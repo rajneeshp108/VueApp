@@ -3,6 +3,11 @@
         "fortawesome",
         "laravel",
         "navbar",
-        "navbar laravel"
+        "navbar laravel",
+        "progressbar",
+        "sweetalert",
+        "vform",
+        "vue",
+        "vue progressbar"
     ]
 }
