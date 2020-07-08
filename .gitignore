@@ -14,3 +14,4 @@ yarn-error.log
 # custom ignores
 /public/js/app.js
 /public/css/app.css
+/public/img/profile/*

@@ -97,9 +97,49 @@ class UserController extends Controller
         return ['message' => 'User deleted successfully.'];
     }
 
-    // function to show user profile
+    /* ***************************** */
+    /* function to show user profile */
+    /* ***************************** */
     public function profile()
     {
         return auth('api')->user();
+    }
+    
+    /* ******************************* */
+    /* function to update user profile */
+    /* ******************************* */
+    public function updateProfile(Request $request)
+    {
+        $user = auth('api')->user();
+
+        $this->validate($request, [
+            'name'     => 'required|string|max:191',
+            'email'    => 'required|string|max:191|email|unique:users,email,'.$user->id,
+            'password' => 'sometimes|min:6|max:20',
+        ]);
+
+        $currentPhoto = $user->photo;
+
+        if($request->photo != $currentPhoto){
+            $name = time() . mt_rand(1,time()) . '.' . explode('/', explode(':', substr($request->photo, 0, strpos( $request->photo, ';' )))[1])[1] ;
+            
+            \Image::make($request->photo)->save(public_path('img/profile/').$name);
+
+            $request->merge(['photo' => $name]);
+
+            $prevPhoto = public_path('img/profile/').$currentPhoto;
+
+            if(file_exists($prevPhoto)){
+                @unlink($prevPhoto);
+            }
+        }
+
+        if(!empty($request->password)){
+            $request->merge(['password' => \Hash::make($request['password'])]);
+        }
+
+        User::where('id', $request->id)->update($request->all());
+
+        return ['message' => 'User Updated Successfully.'];
     }
 }

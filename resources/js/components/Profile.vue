@@ -9,7 +9,7 @@
                         <h5 class="widget-user-desc">Founder &amp; CEO</h5>
                     </div>
                     <div class="widget-user-image">
-                        <img class="img-circle elevation-2" src="img/profile.png" alt="User Avatar">
+                        <img class="img-circle elevation-2" :src="getPhoto" alt="User Avatar">
                     </div>
                     <div class="card-footer">
                         <div class="row">
@@ -171,13 +171,15 @@
                                     <div class="form-group row">
                                         <label for="inputName" class="col-sm-2 col-form-label">Name</label>
                                         <div class="col-sm-10">
-                                            <input v-model="form.name" type="name" class="form-control" id="inputName" placeholder="Name">
+                                            <input v-model="form.name" type="name" class="form-control" :class="{ 'is-invalid': form.errors.has('name') }" id="inputName" placeholder="Name">
+                                            <has-error :form="form" field="name"></has-error>
                                         </div>
                                     </div>
                                     <div class="form-group row">
                                         <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
                                         <div class="col-sm-10">
-                                            <input v-model="form.email" type="email" class="form-control" id="inputEmail" placeholder="Email">
+                                            <input v-model="form.email" type="email" class="form-control" :class="{ 'is-invalid': form.errors.has('email') }" id="inputEmail" placeholder="Email">
+                                            <has-error :form="form" field="email"></has-error>
                                         </div>
                                     </div>
                                     <div class="form-group row">
@@ -185,30 +187,35 @@
                                         <div class="col-sm-10">
                                             <select v-model="form.type" 
                                                     name="type"
-                                                    class="form-control">
+                                                    class="form-control"
+                                                    :class="{ 'is-invalid': form.errors.has('type') }">
                                                 <option value="">Select Type</option>
                                                 <option value="admin">Admin</option>
                                                 <option value="user">User</option>
                                                 <option value="author">Author</option>
                                             </select>
+                                            <has-error :form="form" field="type"></has-error>
                                         </div>
                                     </div>
                                     <div class="form-group row">
                                         <label for="inputBio" class="col-sm-2 col-form-label">Bio</label>
                                         <div class="col-sm-10">
-                                            <textarea v-model="form.bio" class="form-control" id="inputBio" placeholder="Bio"></textarea>
+                                            <textarea v-model="form.bio" class="form-control" :class="{ 'is-invalid': form.errors.has('bio') }" id="inputBio" placeholder="Bio"></textarea>
+                                            <has-error :form="form" field="bio"></has-error>
                                         </div>
                                     </div>
                                     <div class="form-group row">
                                         <label for="inputPhoto" class="col-sm-2 col-form-label">photos</label>
                                         <div class="col-sm-10">
-                                            <input type="file" @change="uploadImage" class="form-control" id="inputPhoto" placeholder="Password">
+                                            <input type="file" @change="uploadImage" class="form-control" :class="{ 'is-invalid': form.errors.has('photo') }" id="inputPhoto" placeholder="Upload Photo">
+                                            <has-error :form="form" field="photo"></has-error>
                                         </div>
                                     </div>
                                     <div class="form-group row">
                                         <label for="inputPassword" class="col-sm-2 col-form-label">Password (Leave empty if not changing)</label>
                                         <div class="col-sm-10">
-                                            <input v-model="form.password" type="password" class="form-control" id="inputPassword" placeholder="Password">
+                                            <input v-model="form.password" type="password" class="form-control" :class="{ 'is-invalid': form.errors.has('password') }" id="inputPassword" placeholder="Password">
+                                            <has-error :form="form" field="password"></has-error>
                                         </div>
                                     </div>
                                     <div class="form-group row">
@@ -222,9 +229,9 @@
                                     </div>
                                     <div class="form-group row">
                                         <div class="offset-sm-2 col-sm-10">
-                                            <button type="submit" class="btn btn-danger">Submit</button>
+                                            <button @click.prevent="updateUser" type="submit" class="btn btn-danger">Submit</button>
                                         </div>
-                                    </div>
+                                    </div>  
                                 </form>
                             </div>
                         <!-- /.tab-pane -->
@@ -255,23 +262,50 @@
         },
 
         methods:{
+            getPhoto(){
+                return "img/profile/"+this.form.photo;
+            },
+            updateUser(){
+                this.$Progress.start();
+
+                this.form.put('api/update-profile')
+                .then(() => {
+					Toast.fire({
+					    icon: 'success',
+					    title: 'Record has been updated'
+					});
+					this.$Progress.finish();
+                })
+                .catch(() => {
+                    this.$Progress.fail();
+                });
+            },  
             uploadImage(e){
-                console.log('----------');
                 let file = e.target.files[0];
 
-                let reader = new FileReader();
-                reader.onloadend = (file) => {
-                    this.form.photo = reader.result;
-                    console.log(this.form.photo);
+                if(file['size'] >= 1024000){
+                    Toast.fire({
+					    icon: 'error',
+					    title: 'Image size must under 1 mb.'
+					});
+                } 
+                else{
+                    let reader = new FileReader();
+                    reader.onloadend = (file) => {
+                        this.form.photo = reader.result;
+                    }
+                    reader.readAsDataURL(file);
                 }
-                reader.readAsDataURL(file);
+            },
+            getUser(){
+                axios.get('api/profile').then(
+                    ({ data }) => (this.form.fill(data))
+                );
             }
         },
 
         created() {
-			axios.get('api/profile').then(
-                ({ data }) => (this.form.fill(data))
-            );
+            this.getUser();
 		}
     }
 </script>
