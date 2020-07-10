@@ -26,6 +26,13 @@ Vue.use(VueProgressBar, {
 	height: '5px'
 });
 
+// user authentication value check
+import Gate from './Gate';
+Vue.prototype.$gate = new Gate(window.user);
+
+// not found page component
+// Vue.component('NotFound', require('./components/NotFound.vue'));
+Vue.component('NotFound', require('./components/NotFound.vue'));
 
 // Sweet alert 2 
 import Swal from 'sweetalert2';

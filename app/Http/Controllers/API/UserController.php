@@ -19,7 +19,14 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::latest()->paginate(10);
+        // $this->authorize('isAdmin');
+        
+        // bonus code for informational purpose
+        if(\Gate::allows('isAdmin')){
+            return User::latest()->paginate(10);
+        }else{
+            return ['message' => 'Unauthorized User.'];
+        }
     }
 
     /**
@@ -89,12 +96,16 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        $user = User::findOrFail($id);
+        if($this->authorize('isAdmin')){
+            
+            $user = User::findOrFail($id);
+            $user->delete($id);
 
-        // delete user
-        $user->delete($id);
-
-        return ['message' => 'User deleted successfully.'];
+            return ['message' => 'User deleted successfully.'];
+            
+        } else{
+            return ['message' => 'Not authorized user.'];
+        }
     }
 
     /* ***************************** */

@@ -9,7 +9,7 @@
                         <h5 class="widget-user-desc">Founder &amp; CEO</h5>
                     </div>
                     <div class="widget-user-image">
-                        <img class="img-circle elevation-2" :src="getPhoto" alt="User Avatar">
+                        <img class="img-circle elevation-2" :src="getPhoto()" alt="User Avatar">
                     </div>
                     <div class="card-footer">
                         <div class="row">
@@ -263,7 +263,8 @@
 
         methods:{
             getPhoto(){
-                return "img/profile/"+this.form.photo;
+                var photo = this.form.photo.length <= 100 ? "img/profile/"+this.form.photo : this.form.photo; 
+                return photo;
             },
             updateUser(){
                 this.$Progress.start();
